@@ -92,7 +92,7 @@ const BotResponseContainer = (props) => {
         >
             <div className='inner'>
                 {hasText && renderText()}
-                {hasButtons && renderButtons()}
+                {hasButtons && value.buttons !== null && renderButtons()}
             </div>
             {deletable && <FloatingIconButton icon='trash' onClick={() => onDelete()} />}
         </div>

@@ -18,29 +18,13 @@ import { RESPONSES_MODIFIED, RESPONSES_DELETED } from './subscriptions';
 import { DELETE_BOT_RESPONSE } from '../mutations';
 import { ProjectContext } from '../../../layouts/context';
 
-export const defaultTemplate = (template) => {
-    if (template === 'text') {
-        return { text: '' };
-    }
-    if (template === 'qr') {
-        return {
-            text: '',
-            buttons: [
-                {
-                    title: '',
-                    type: 'postback',
-                    payload: '',
-                },
-            ],
-        };
-    }
-    return false;
-};
 
 class Templates extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { activeItem: 'content', activeEditor: null };
+        this.state = {
+            activeItem: 'content', activeEditor: null, newResponse: { open: false, type: '' },
+        };
     }
 
     setActiveEditor = (responseKey) => {
@@ -48,27 +32,6 @@ class Templates extends React.Component {
     };
 
     handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
-
-    handleCreateSequence = (template) => {
-        const { insertResponse } = this.props;
-        const { activeEditor } = this.props;
-        const language = 'en';
-        const key = `utter_${shortid.generate()}`;
-        const newTemplate = {
-            key,
-            values: [
-                {
-                    sequence: [{ content: safeDump(defaultTemplate(template)) }],
-                    lang: language,
-                },
-            ],
-        };
-        insertResponse(newTemplate, (err) => {
-            if (!err) {
-                this.setState({ activeEditor: key });
-            }
-        });
-    };
 
     creatResponse = () => {};
 
@@ -79,11 +42,11 @@ class Templates extends React.Component {
                 <Dropdown.Menu>
                     <Dropdown.Item
                         text='Text'
-                        onClick={() => this.handleCreateSequence('text')}
+                        onClick={() => this.setState({ newResponse: { open: true, type: 'text' } })}
                     />
                     <Dropdown.Item
                         text='Quick replies'
-                        onClick={() => this.handleCreateSequence('qr')}
+                        onClick={() => this.setState({ newResponse: { open: true, type: 'text' } })}
                     />
                     <Dropdown.Item
                         text='Image'
@@ -129,7 +92,7 @@ class Templates extends React.Component {
     );
 
     render() {
-        const { activeItem, activeEditor } = this.state;
+        const { activeItem, activeEditor, newResponse } = this.state;
         const {
             templates, projectId, nluLanguages, deleteBotResponse,
         } = this.props;
@@ -145,6 +108,8 @@ class Templates extends React.Component {
                                 nluLanguages={nluLanguages}
                                 activeEditor={activeEditor}
                                 setActiveEditor={this.setActiveEditor}
+                                newResponse={newResponse}
+                                closeNewResponse={() => this.setState({ newResponse: { open: false } })}
                             />
                         </div>
                     )}

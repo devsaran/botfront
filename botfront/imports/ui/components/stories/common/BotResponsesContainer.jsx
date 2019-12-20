@@ -1,8 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Placeholder } from 'semantic-ui-react';
+import { Placeholder, Button } from 'semantic-ui-react';
 
+import BotResponseEditor from '../../templates/templates-list/BotResponseEditor';
 import FloatingIconButton from '../../common/FloatingIconButton';
 import BotResponseContainer from './BotResponseContainer';
 import ExceptionWrapper from './ExceptionWrapper';
@@ -16,8 +17,11 @@ const BotResponsesContainer = (props) => {
         deletable,
         exceptions,
         isNew,
+        refreshBotResponse,
+        enableEditPopup,
     } = props;
     const [template, setTemplate] = useState(initialValue || null);
+    const [editorOpen, setEditorOpen] = useState(false);
     const [toBeCreated, setToBeCreated] = useState(null);
     const [focus, setFocus] = useState(isNew ? 0 : null);
 
@@ -76,7 +80,7 @@ const BotResponsesContainer = (props) => {
             setToBeCreated(null);
         }
     }, [toBeCreated]);
-
+    
     const renderResponse = (response, index, sequenceArray) => (
         <React.Fragment
             key={`${response.text}-${(sequenceArray[index + 1] || {}).text}-${index}`}
@@ -111,6 +115,21 @@ const BotResponsesContainer = (props) => {
                 {deletable && onDeleteAllResponses && (
                     <FloatingIconButton icon='trash' onClick={onDeleteAllResponses} />
                 )}
+                {enableEditPopup && (
+                    <div className='response-edit-menu'>
+                        <BotResponseEditor
+                            trigger={(
+                                <Button className='delete-responses' icon={{ name: 'ellipsis vertical', size: 'small' }} onClick={() => setEditorOpen(true)} data-cy='delete-responses' />
+                            )}
+                            open={editorOpen}
+                            name={name}
+                            closeModal={() => setEditorOpen(false)}
+                            renameable={false}
+                            refreshBotResponse={refreshBotResponse}
+                        />
+                        <Button className='open-edit-responses' icon={{ name: 'trash', size: 'small' }} onClick={onDeleteAllResponses} data-cy='edit-responses' />
+                    </div>
+                )}
             </div>
         </ExceptionWrapper>
     );
@@ -124,6 +143,8 @@ BotResponsesContainer.propTypes = {
     onDeleteAllResponses: PropTypes.func,
     exceptions: PropTypes.array,
     isNew: PropTypes.bool.isRequired,
+    refreshBotResponse: PropTypes.func,
+    enableEditPopup: PropTypes.bool,
 };
 
 BotResponsesContainer.defaultProps = {
@@ -133,6 +154,8 @@ BotResponsesContainer.defaultProps = {
     onChange: () => {},
     onDeleteAllResponses: null,
     exceptions: [{ type: null }],
+    refreshBotResponse: () => {},
+    enableEditPopup: true,
 };
 
 export default BotResponsesContainer;

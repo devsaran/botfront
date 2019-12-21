@@ -22,6 +22,75 @@ describe('Bot responses', function() {
 
     afterEach(function() {
     });
+    it('should create a response using the response editor', function() {
+        cy.visit('/project/bf/dialogue/templates')
+        cy.dataCy('create-response').click();
+        cy.dataCy('add-text-response').click();
+        cy.dataCy('response-name-input').click().find('input').type('test_A');
+        cy.dataCy('bot-response-input').find('textarea').type('response content');
+        cy.get('.dimmer').click({ position: 'topLeft'}) // close the response editor
+        cy.dataCy('template-intent').contains('utter_test_A').should('exist')
+        cy.dataCy('remove-response-0').click();
+    });
+    // it('should not allow duplicate names when editing a response', function() {
+    // });
+    // it('should not allow duplicate names when creating a response', function() {
+    // });
+    // it('should require response names to start with utter_', function() {
+    // })
+    // it('should disable edit-reponse-input if the response is used in a story', function() {
+    // })
+    it('be able to edit a response with the response editor in the visual story editor', function() {
+        cy.visit('/project/bf/dialogue/templates')
+        cy.dataCy('create-response').click();
+        cy.dataCy('add-text-response').click();
+        cy.dataCy('response-name-input').click().find('input').type('test_A');
+        cy.dataCy('bot-response-input').find('textarea').type('aa');
+        cy.get('.dimmer').click({ position: 'topLeft'}) // close the response editor
+        cy.dataCy('template-intent').contains('utter_test_A').should('exist')
+
+        cy.visit('/project/bf/stories')
+        cy.dataCy('add-item').click();
+        cy.dataCy('add-item-input')
+        .find('input')
+        .type('myTest{enter}');
+        cy.wait(250);
+        cy.dataCy('toggle-md').click();
+        cy.get('.ace_content').click({ force: true })
+        cy.get('textarea').type('  - utter_test_A')
+        cy.dataCy('toggle-visual').click()
+        cy.dataCy('bot-response-input').contains('aa').should('exist')
+        cy.wait(250);
+        cy.dataCy('edit-responses').click()
+        cy.dataCy('response-editor').should('exist');
+        cy.wait(250);
+
+        
+        cy.dataCy('response-editor').findCy('bot-response-input').type('{backspace}{backspace}edited by response editor')
+        cy.dataCy('response-name-input').should('have.class', 'disabled')
+        cy.dataCy('metadata-tab').click();
+        cy.get('.item').contains('Custom CSS').click();
+        cy.get('.checkbox').find('label').click();
+        cy.dataCy('custom-message-css').find('textarea').type('div{}')
+        cy.dataCy('submit-metadata').click();
+        cy.get('.dimmer').click({ position: 'topLeft'})
+
+        cy.dataCy('bot-response-input').contains('edited by response editor').should('exist')
+        cy.dataCy('bot-response-input').type('edited by visual story')
+        cy.dataCy('browser-item').contains('myTest').click()
+
+        cy.dataCy('edit-responses').click({ force: true })
+        cy.dataCy('response-editor').should('exist');
+        cy.wait(250);
+        cy.dataCy('response-editor').findCy('bot-response-input').contains('edited by visual story')
+        cy.dataCy('metadata-tab').click();
+        cy.get('.item').contains('Custom CSS').click();
+        cy.dataCy('custom-message-css').contains('div{}').should('exist');
+    })
+});
+
+    // ____ OLD TESTS___
+
 
     // before(function() {
     //     cy.createProject('bf', 'My Project', 'fr')
@@ -165,72 +234,3 @@ describe('Bot responses', function() {
     //     cy.get('.ace_text-input').type('text: text above the buttons{enter}buttons:{enter}  - title: Button1{enter}  type: postback{enter}payload: /payload1{enter}{backspace}- title: Button2{enter}  payload: /payload2');
     //     cy.get('.warning').should('not.exist');
     // });
-    it('should create a response using the response editor', function() {
-        cy.visit('/project/bf/dialogue/templates')
-        cy.dataCy('create-response').click();
-        cy.dataCy('add-text-response').click();
-        cy.dataCy('response-name-input').click().find('input').type('test_A');
-        cy.dataCy('bot-response-input').find('textarea').type('response content');
-        cy.get('.dimmer').click({ position: 'topLeft'}) // close the response editor
-        cy.dataCy('template-intent').contains('utter_test_A').should('exist')
-        cy.dataCy('remove-response-0').click();
-    });
-    it('should not create an empty response using the response editor', function() {
-        cy.visit('/project/bf/dialogue/templates')
-        cy.dataCy('create-response').click();
-        cy.dataCy('add-text-response').click();
-        cy.get('.dimmer').click({ position: 'topLeft'}) //close the dimmer editor
-        cy.dataCy('template-intent').should('have.length', 0)
-    });
-    // it('should not duplicate names using the response editor', function() {
-    // });
-    // it('should disable edit-reponse-input if the response is used in a story', function() {
-    // })
-    it('be able to edit a response with the response editor in the visual story editor', function() {
-        cy.visit('/project/bf/dialogue/templates')
-        cy.dataCy('create-response').click();
-        cy.dataCy('add-text-response').click();
-        cy.dataCy('response-name-input').click().find('input').type('test_A');
-        cy.dataCy('bot-response-input').find('textarea').type('aa');
-        cy.get('.dimmer').click({ position: 'topLeft'}) // close the response editor
-        cy.dataCy('template-intent').contains('utter_test_A').should('exist')
-
-        cy.visit('/project/bf/stories')
-        cy.dataCy('add-item').click();
-        cy.dataCy('add-item-input')
-        .find('input')
-        .type('myTest{enter}');
-        cy.wait(250);
-        cy.dataCy('toggle-md').click();
-        cy.get('.ace_content').click({ force: true })
-        cy.get('textarea').type('  - utter_test_A')
-        cy.dataCy('toggle-visual').click()
-        cy.dataCy('bot-response-input').contains('aa').should('exist')
-        cy.wait(250);
-        cy.dataCy('edit-responses').click()
-        cy.dataCy('response-editor').should('exist');
-        cy.wait(250);
-
-        
-        cy.dataCy('response-editor').findCy('bot-response-input').type('{backspace}{backspace}edited by response editor')
-        cy.dataCy('response-name-input').should('have.class', 'disabled')
-        cy.dataCy('metadata-tab').click();
-        cy.get('.item').contains('Custom CSS').click();
-        cy.get('.checkbox').find('label').click();
-        cy.dataCy('custom-message-css').find('textarea').type('div{}')
-        cy.dataCy('submit-metadata').click();
-        cy.get('.dimmer').click({ position: 'topLeft'})
-
-        cy.dataCy('bot-response-input').contains('edited by response editor').should('exist')
-        cy.dataCy('bot-response-input').type('edited by visual story')
-        cy.dataCy('browser-item').contains('myTest').click()
-
-        cy.dataCy('edit-responses').click({ force: true })
-        cy.dataCy('response-editor').should('exist');
-        cy.wait(250);
-        cy.dataCy('response-editor').findCy('bot-response-input').contains('edited by visual story')
-        cy.dataCy('metadata-tab').click();
-        cy.get('.item').contains('Custom CSS').click();
-        cy.dataCy('custom-message-css').contains('div{}').should('exist');
-    })
-});
